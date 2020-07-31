@@ -6,7 +6,22 @@ var budgetController = (function()
        this.expid = idArg;
        this.expdescription = descriptionArg;
        this.expvalue = valueArg;
+       this.percentage = -1;
    };
+
+   Expenses.prototype.calcPerc = function(totalIncomeValue){
+
+        if(totalIncomeValue > 0)
+        {
+            this.percentage = Math.round(((this.expvalue)/(totalIncomeValue))*100);
+        }
+   };
+
+   Expenses.prototype.getPerc = function(){
+
+        return this.percentage;
+
+   }
 
    var Incomes = function(idArg, descriptionArg, valueArg){     // this is the function constructor for the income object
         this.incid = idArg;
@@ -123,6 +138,20 @@ var budgetController = (function()
 
         },
 
+        calculatePercentages: function(){
+
+            data.items.expArr.forEach((element) => {element.calcPerc(data.total.incTotal);});
+        },
+
+        getPercentages: function(){
+
+            var percentageArr = data.items.expArr.map( function(element)
+            {
+                return element.getPerc();
+            } );
+            return percentageArr;
+        },
+
         calculateBudget: function(){                                   // this method is used during addition and deletion of the list item
 
             data.total.expTotal = calculateFunc('exp');
@@ -138,11 +167,11 @@ var budgetController = (function()
             }
         },
 
-        /*
+        
         testing: function(){                        // this method is only to make the private data var to be public and for testing purposes
             console.log(data); 
         }
-        */
+        
     };
 
 })();
@@ -157,6 +186,7 @@ var UIController = (function(){
         inputBtn: '.add__btn',
         inputIncomeClass: '.income__list',
         inputExpenseClass: '.expenses__list',
+        inputExpensePercentageClass: '.item__percentage',
         budgetLabel: '.budget__value',
         budgetIncLabel: '.budget__income--value',
         budgetExpLabel: '.budget__expenses--value',
@@ -186,7 +216,7 @@ var UIController = (function(){
             // step2: the selected feilds variable is a list, we need to convert it into an array
             selectedFeildsArr = Array.prototype.slice.call(selectedFeilds);
             //step3: each element of the array, its input feild must be erased
-            selectedFeildsArr.forEach((element)=> {element.value = '';} ) 
+            selectedFeildsArr.forEach((element)=> {element.value = '';} ) //the value is modified wrt to the html document 
             selectedFeildsArr[0].focus();
         },
 
@@ -253,6 +283,11 @@ var UIController = (function(){
             {
                 document.querySelector(DOMinUI.budgetPercentageLabel).textContent = '---';
             }
+        },
+
+        displayPercentages: function(arr){
+
+            var selectedNodesList = 
         }
     };
 })();
@@ -286,6 +321,17 @@ var appController = (function(bdgtctrl, UIctrl)
         
     };
 
+    var updatePercentages = function(){
+
+        //step1: to claculate the percentages in the buget controller module
+        bdgtctrl.calculatePercentages();
+        //step2: to return the upadted percentages to the app controller module
+        var percentageArrAppcontroller = bdgtctrl.getPercentages();
+        console.log(percentageArrAppcontroller);
+        //step3: to update the ui with the updated percentages
+
+    }
+
     var ctlrDelItem = function(event){
                                                             // the problem occurs due to the different naming of the constructor properties
         // step1: to find the DOM node on which the event is being triggered
@@ -312,6 +358,7 @@ var appController = (function(bdgtctrl, UIctrl)
         UIctrl.deleteItemFromUI( selectedItemParent, selectedItem);
         // step4: update and display the budget
         updateBudget();
+        updatePercentages();
     }
 
     var ctlrAddItem = function()                                            // better to put this iife under private stuff
@@ -328,6 +375,7 @@ var appController = (function(bdgtctrl, UIctrl)
             UIctrl.clearUIFeilds();                                                         //step4: to clear the input feilds on the ui
 
             updateBudget();                                                                 //includes all the steps related to the budget
+            updatePercentages();                                                         //includes all the steps related to the percentages
         }
         else
         {
