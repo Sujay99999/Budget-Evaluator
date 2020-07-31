@@ -49,7 +49,7 @@ var budgetController = (function()
 
     return{
 
-        getBudget: function(){
+        getBudget: function(){                                             // methos to return a customized object to the controller module
             
             return{
 
@@ -97,7 +97,7 @@ var budgetController = (function()
             return objInstance;
         },
 
-        deleteItemBdgt: function( typeArg, idArg){                                   //
+        deleteItemBdgt: function( typeArg, idArg){                          //method to delete the required element from the budget controller
             //the values are either 'income' and 'expense'
             if(typeArg === 'income')
             {
@@ -122,7 +122,7 @@ var budgetController = (function()
 
         },
 
-        calculateBudget: function(){
+        calculateBudget: function(){                                   // this method is used during addition and deletion of the list item
 
             data.total.expTotal = calculateFunc('exp');
             data.total.incTotal = calculateFunc('inc');
@@ -137,9 +137,11 @@ var budgetController = (function()
             }
         },
 
-        testing: function(){                                                // this method is only to make the private data var to be public
+        /*
+        testing: function(){                        // this method is only to make the private data var to be public and for testing purposes
             console.log(data); 
         }
+        */
     };
 
 })();
@@ -231,13 +233,13 @@ var UIController = (function(){
             
         },
 
-        deleteItemFromUI: function( parentDOMSelector, childDOMSelector){
+        deleteItemFromUI: function( parentDOMSelector, childDOMSelector){ //method to delete the list from the ui
 
             parentDOMSelector.removeChild(childDOMSelector);
 
         },
 
-        displayBudget: function(object){
+        displayBudget: function(object){                                  //After calculating the budget, we need to display it on the ui
 
             document.querySelector(DOMinUI.budgetLabel).textContent = object.budgetTotal;
             document.querySelector(DOMinUI.budgetIncLabel).textContent = object.budgetIncTotal;
