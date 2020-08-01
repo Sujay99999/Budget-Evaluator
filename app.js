@@ -9,11 +9,15 @@ var budgetController = (function()
        this.percentage = -1;
    };
 
-   Expenses.prototype.calcPerc = function(totalIncomeValue){
+   Expenses.prototype.calcPerc = function(totalIncomeValue, totalFinalValue){
 
-        if(totalIncomeValue > 0)
+        if(totalFinalValue > 0)
         {
             this.percentage = Math.round(((this.expvalue)/(totalIncomeValue))*100);
+        }
+        else
+        {
+            this.percentage = '---';
         }
    };
 
@@ -140,7 +144,7 @@ var budgetController = (function()
 
         calculatePercentages: function(){
 
-            data.items.expArr.forEach((element) => {element.calcPerc(data.total.incTotal);});
+            data.items.expArr.forEach((element) => {element.calcPerc(data.total.incTotal, data.total.finalTotal);});
         },
 
         getPercentages: function(){
@@ -191,7 +195,39 @@ var UIController = (function(){
         budgetIncLabel: '.budget__income--value',
         budgetExpLabel: '.budget__expenses--value',
         budgetPercentageLabel: '.budget__expenses--percentage',
-        containerClass: '.container'
+        containerClass: '.container',
+        budgetTimeLabel: '.budget__title--month'
+    };
+
+    var formatNumber =  function(number, typeArg){
+
+        //steps:
+        //1. find the absolute value of the number
+        //2. fix the decimal numbers upto 2 values
+        //3. split the number into integer and decimal parts
+        //4. add the comma to the integer part
+        var typeSymbol, numberArr;
+        number = Math.abs(number);
+        number = number.toFixed(2);                             // this method of number converts the number to a string
+        numberArr = number.split('.');
+        integerPart = numberArr[0];                             // both integerPart and decimalPart are strings
+        decimalPart = numberArr[1];
+        if(typeArg === 'inc')
+        {
+            typeSymbol = '+';
+        }
+        else
+        {
+            typeSymbol = '-';
+        }
+        if(integerPart.length > 3)
+        {
+            integerPart = integerPart.substr(0, integerPart.length-3) + ',' + integerPart.substr(integerPart.length-3, 3);
+        }
+
+        number = typeSymbol + ' ' + integerPart + '.' + decimalPart;
+        return number;
+        
     };
 
     return{
@@ -220,6 +256,17 @@ var UIController = (function(){
             selectedFeildsArr[0].focus();
         },
 
+        changeOutlineUI: function(){                             // this method is to change the outline of the focussed feilds during input
+
+            var selectedFeilds = document.querySelectorAll(DOMinUI.inputType + ',' + DOMinUI.inputDescription + ',' + DOMinUI.inputValue);
+            console.log('yes');
+            var selectedFeildsArr = Array.prototype.slice.call(selectedFeilds);
+            selectedFeildsArr.forEach((element) => {
+                element.classList.toggle('red-focus');
+            });
+            document.querySelector(DOMinUI.inputBtn).classList.toggle('red');
+        },
+
         addItemToUI: function(object, typeArg)                      // this method is used to add the input object to the interface
         {
             var htmlStr, newHtmlStr, objClass;
@@ -238,7 +285,7 @@ var UIController = (function(){
                 </div>`;
                 newHtmlStr =  htmlStr.replace('%incid%', object.incid);
                 newHtmlStr = newHtmlStr.replace('%incdescription%', object.incdescription);
-                newHtmlStr = newHtmlStr.replace('%incvalue%', object.incvalue);
+                newHtmlStr = newHtmlStr.replace('%incvalue%', formatNumber(object.incvalue, typeArg));
                 document.querySelector(DOMinUI.inputIncomeClass).insertAdjacentHTML('beforeend', newHtmlStr);
             }
             else
@@ -258,7 +305,7 @@ var UIController = (function(){
                 </div>`;
                 newHtmlStr =  htmlStr.replace('%expid%', object.expid);
                 newHtmlStr = newHtmlStr.replace('%expdescription%', object.expdescription);
-                newHtmlStr = newHtmlStr.replace('%expvalue%', object.expvalue);
+                newHtmlStr = newHtmlStr.replace('%expvalue%', formatNumber(object.expvalue, typeArg));
                 document.querySelector(DOMinUI.inputExpenseClass).insertAdjacentHTML('beforeend', newHtmlStr);
             }
             
@@ -272,9 +319,17 @@ var UIController = (function(){
 
         displayBudget: function(object){                                  //After calculating the budget, we need to display it on the ui
 
-            document.querySelector(DOMinUI.budgetLabel).textContent = object.budgetTotal;
-            document.querySelector(DOMinUI.budgetIncLabel).textContent = object.budgetIncTotal;
-            document.querySelector(DOMinUI.budgetExpLabel).textContent = object.budgetExpTotal;
+            if(object.budgetTotal > 0)
+            {
+                document.querySelector(DOMinUI.budgetLabel).textContent = formatNumber(object.budgetTotal, 'inc');
+            }
+            else
+            {
+                document.querySelector(DOMinUI.budgetLabel).textContent = formatNumber(object.budgetTotal, 'exp');
+            }
+            
+            document.querySelector(DOMinUI.budgetIncLabel).textContent = formatNumber(object.budgetIncTotal, 'inc');
+            document.querySelector(DOMinUI.budgetExpLabel).textContent = formatNumber(object.budgetExpTotal, 'exp');
             if(object.budgetPercentage > 0)
             {
                 document.querySelector(DOMinUI.budgetPercentageLabel).textContent = object.budgetPercentage;
@@ -287,7 +342,34 @@ var UIController = (function(){
 
         displayPercentages: function(arr){
 
-            var selectedNodesList = 
+            var selectedNodesList = document.querySelectorAll(DOMinUI.inputExpensePercentageClass);
+            var selectedNodesArr = Array.prototype.slice.call(selectedNodesList);
+            for(var i=0;i<arr.length;i++)
+            {
+                if(arr[i] > 0)
+                {
+                    selectedNodesArr[i].textContent = arr[i] + '%';
+                }
+                else
+                {
+                    selectedNodesArr[i].textContent = '---';
+                }
+            }
+            
+        }, 
+
+        displayTime: function(){
+
+            presentTime = new Date();
+            presentTimeYear = presentTime.getFullYear();
+            presentTimeMonth = presentTime.getMonth();
+            monthArr = ['January', 'February', 'March', 'April', 'May', 'June','July', 'August', 'September', 'October', 'November', 'December'];
+            document.querySelector(DOMinUI.budgetTimeLabel).textContent = monthArr[presentTimeMonth] + ' ' + presentTimeYear;
+        },
+
+        testing: function(numberArg, typeArg){
+            
+            console.log(formatNumber(numberArg, typeArg));
         }
     };
 })();
@@ -307,6 +389,7 @@ var appController = (function(bdgtctrl, UIctrl)
             }
         });
         document.querySelector(DOMinAppcontroller.containerClass).addEventListener('click', ctlrDelItem);
+        document.querySelector(DOMinAppcontroller.inputType).addEventListener('change', UIctrl.changeOutlineUI);
     }
 
 
@@ -329,6 +412,7 @@ var appController = (function(bdgtctrl, UIctrl)
         var percentageArrAppcontroller = bdgtctrl.getPercentages();
         console.log(percentageArrAppcontroller);
         //step3: to update the ui with the updated percentages
+        UIctrl.displayPercentages(percentageArrAppcontroller);
 
     }
 
@@ -399,6 +483,7 @@ var appController = (function(bdgtctrl, UIctrl)
         init: function(){                                                   // creating an init function for the whole application
             console.log('the application has begun');
             setupEventListeners();
+            UIctrl.displayTime();                                           // methos for displaying the time
             UIctrl.displayBudget({budgetTotal: 0,budgetIncTotal: 0,budgetExpTotal: 0,budgetPercentage: 0})
                                     // initializing the Ui values to be 0. Here we are passing an object directly to the function
         }
