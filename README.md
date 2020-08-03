@@ -4,20 +4,18 @@ This project calculates the total BUDGET using the given INCOME and EXPENSES for
 
 The TOTAL budget is calculated
 
-How to use
-Select + or - from drop-down menu
+## How to use
+1. Select + or - from drop-down menu
 
-This will convert to either an INCOME or EXPENSE
+2. This will convert to either an INCOME or EXPENSE
 
-Add a description and a value
+3. Add a description and a value
 
-TOTAL is calculated above
+4. TOTAL is calculated above
 
-Hover over added item to delete
+5. Hover over added item to delete
 
-View Live
-http://budget-calculator.s3-website-ap-southeast-2.amazonaws.com/
 
-View Local
+## View Local
 Clone this repo
 Open index.html in broswer
