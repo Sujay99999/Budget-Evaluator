@@ -22,4 +22,4 @@ The TOTAL budget is calculated
 Clone this repo
 Open index.html in broswer
 
-> > > > > > > 8b4ad961841a20d385d16def775897e42107ace7
+## Deployed on https://sujay99999.github.io/Budget-Evaluator/
